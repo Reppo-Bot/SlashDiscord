@@ -1,0 +1,70 @@
+needs
+- base class
+    - add commands
+    - handle discord connections
+    - map commands to functions
+    - entity structures for users, perms, etc
+    - T E S T 
+    - handle heartbeats
+- steps
+    - define commands
+    - tell discord in batch request
+    - after confirm, initiate connection request (socket) from bot
+
+users concerns
+- create commands
+- push commands
+- initiate connection
+
+- easily repeatable
+
+
+# example
+from ourLib import Client, Command, Options, Interaction, register_commands
+
+client = Client('token', intents=[])
+
+commands = []
+
+async def hello_handler(interaction):
+    interaction.reply('hello')
+
+
+# discord slash commands
+client.push(new Command(name='Hello', desc='I am a command', options=[stuff: Options], guild_id=123456, handler=hello_handler))
+
+if !client.register():
+    throw 'failed to register commands'
+
+# event handling for discord
+client.on('death', function)
+
+if !client.connected:
+    throw 'Failed to Connect'
+
+client()
+
+event dict
+
+
+class Client : Stack:
+    # init
+    command_dict
+    event_dict
+    
+    runner()
+    __call__():
+        start connection
+        initiate heartbeat with intents
+        1. heartbeat
+        2. check for events
+        3. check for commands
+        on error do webhook for death
+
+class User
+
+class Interaction
+
+class Guild
+
+static enum of intents
