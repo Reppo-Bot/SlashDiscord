@@ -15,9 +15,9 @@ class COMMAND_TYPE(Enum):
     MESSAGE = 3
 
 class Command:
-    name: str = None
-    _type: int = None
-    description: str = None
+    name: str
+    _type: int
+    description: str
     options: list(option) = None
     guild_ids: list(int) = None
     default_perms: bool = True
