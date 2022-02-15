@@ -2,6 +2,7 @@
 
 from typing import Any, Callable
 from enum import Enum
+import json
 
 option = dict
 choice = dict
@@ -36,7 +37,7 @@ class Command:
             _dict["permissions"] = self.permissions
         try:
             return json.loads(json.dumps(_dict))
-        except: Exception(e):
+        except:
             return None
     def __init__(self, name: str, description: str, options: list(option) = None) -> None: ...
     def __call__(self, *args: Any, **kwds: Any) -> Any: ... # calls the handler function with the given args?
