@@ -63,99 +63,155 @@ class MessageComponent:
     def __iter__(self) -> dict: ...
 
 class AllowedMentions:
-    parse: list(str)
-    roles: list(str)
-    users: list(str)
-    replied_user: bool
-    def __init__(self, parse: list(str) = None, roles: list(str) = None, users: list(str) = None, replied_user: bool = None) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, parse: list(str) = None, roles: list(str) = None, users: list(str) = None, replied_user: bool = None):
+        self.parse = parse
+        self.roles = roles
+        self.users = users
+        self.replied_user = replied_user
+    def __iter__(self) -> dict: 
+        return {
+            "parse": self.parse,
+            "roles": self.roles,
+            "users": self.users,
+            "replied_user": self.replied_user
+        }
 
 class Attachment:
-    id: str
-    filename: str
-    description: str
-    content_type: str = None
-    size: int = None
-    url: str = None
-    proxy_url: str = None
-    height: int = None
-    width: int = None
-    ephemeral: bool = None
-    def __init__(self, id: str, filename: str, description: str, content_type: str = None, size: int = None, url: str = None, proxy_url: str = None, height: int = None, width: int = None, ephemeral: bool = None) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, id, filename, description, content_type = None, size = None, url = None, proxy_url = None, height = None, width = None, ephemeral = None):
+        self.id = id
+        self.filename = filename
+        self.description = description
+        self.content_type = content_type
+        self.size = size
+        self.url = url
+        self.proxy_url = proxy_url
+        self.height = height
+        self.width = width
+        self.ephemeral = ephemeral
+    def __iter__(self) -> dict: 
+        return {
+            "id": self.id,
+            "filename": self.filename,
+            "description": self.description,
+            "content_type": self.content_type,
+            "size": self.size,
+            "url": self.url,
+            "proxy_url": self.proxy_url,
+            "height": self.height,
+            "width": self.width,
+            "ephemeral": self.ephemeral
+        }
 
 class Message(InteractionCallbackData):
-    type: int = INTERACTION_CALLBACK_TYPES.MESSAGE
-    tts: bool = None
-    content: str = None
-    embeds: list(Embed) = None
-    allows_mentions: list(AllowedMentions) = None
-    message_flags: Bitfield
-    components: list(MessageComponent) = None
-    attachments: list(Attachment) = None
-    def __init__(self, content: str = None, tts: bool = None, embeds: list(Embed) = None, allows_mentions: list = None, message_flags: Bitfield = None, components: list = None, attachments: list = None) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, content = None, tts = None, embeds = None, allows_mentions = None, message_flags = None, components = None, attachments = None):
+        self.content = content
+        self.tts = tts
+        self.embeds = embeds
+        self.allows_mentions = allows_mentions
+        self.message_flags = message_flags
+        self.components = components
+        self.attachments = attachments
+    def __iter__(self) -> dict:
+        return {
+            "content": self.content,
+            "tts": self.tts,
+            "embeds": self.embeds,
+            "allows_mentions": self.allows_mentions,
+            "message_flags": self.message_flags,
+            "components": self.components,
+            "attachments": self.attachments
+        }
 
 class Autocomplete(InteractionCallbackData):
     type: int = INTERACTION_CALLBACK_TYPES.AUTOCOMPLETE
     def __iter__(self) -> dict: ...
 
 class Modal(InteractionCallbackData):
-    type: int = INTERACTION_CALLBACK_TYPES.MODAL
-    custom_id: str
-    title: str
-    components: list(MessageComponent)
-    def __init__(self, custom_id: str, title: str, components: list(MessageComponent)) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, custom_id, title, components): 
+        self.custom_id = custom_id
+        self.title = title
+        self.components = components
+    def __iter__(self) -> dict: 
+        return {
+            "custom_id": self.custom_id,
+            "title": self.title,
+            "components": self.components
+        }
 
 class Interaction:
-    _type: int = None
-    member: Member = None
-    id: str = None
-    guild_id: str = None
-    channel_id: str = None
-    data: dict = None
-    def __init__(self, type: int, member: Member, id: str, guild_id: str = None, channel_id: str = None, data: dict = None) -> None: ...
-    def send(messsage: Message = None, autocomplete: Autocomplete = None, modal: Modal = None) -> None: ...
+    def __init__(self, type: int, member, id, guild_id = None, channel_id = None, data = None):
+        self._type = type
+        self.member = member
+        self.id = id
+        self.guild_id = guild_id
+        self.channel_id = channel_id
+        self.data = data
+    def send(messsage = None, autocomplete = None, modal = None): ...
 
 class ChannelMention:
-    id: str = None
-    guild_id: str
-    type: int
-    name: str # name of channel
-    def __init__(self, id: str, guild_id: str, type: int, name: str) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, id, guild_id, type, name):
+        self.id = id
+        self.guild_id = guild_id
+        self.type = type
+        self.name = name
+    def __iter__(self):
+        return {
+            "id": self.id,
+            "guild_id": self.guild_id,
+            "type": self.type,
+            "name": self.name
+        }
 
 class ActionRow(MessageComponent):
     type: int = MESSAGE_COMPONENT_TYPES.ACTION_ROW
     components: list(MessageComponent)
 
 class PartialEmoji:
-    name: str
-    id: str
-    animated: bool
-    def __init__(self, name: str, id: str, animated: bool) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, name, id, animated):
+        self.name = name
+        self.id = id
+        self.animated = animated
+    def __iter__(self):
+        return {
+            "name": self.name,
+            "id": self.id,
+            "animated": self.animated
+        }
 
 class Button(MessageComponent):
-    type: int = MESSAGE_COMPONENT_TYPES.BUTTON
-    style: int
-    label: str
-    emoji: PartialEmoji
-    custom_id: str
-    url: str
-    disabled: bool = False
-    def __init__(self, style: int, label: str, emoji: PartialEmoji, custom_id: str, url: str, disabled: bool = False) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, style, label, emoji, custom_id, url, disabled = False):
+        self.style = style
+        self.label = label
+        self.emoji = emoji
+        self.custom_id = custom_id
+        self.url = url
+        self.disabled = disabled
+
+    def __iter__(self):
+        return {
+            "style": self.style,
+            "label": self.label,
+            "emoji": self.emoji,
+            "custom_id": self.custom_id,
+            "url": self.url,
+            "disabled": self.disabled
+        }
 
 class SelectOption:
-    label: str
-    value: str
-    description: str
-    emoji: PartialEmoji
-    default: bool
-    def __init__(self, label: str, value: str, description: str, emoji: PartialEmoji, default: bool) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, label, value, description, emoji, default):
+        self.label = label
+        self.value = value
+        self.description = description
+        self.emoji = emoji
+        self.default = default
+    def __iter__(self) -> dict:
+        return {
+            "label": self.label,
+            "value": self.value,
+            "description": self.description,
+            "emoji": self.emoji,
+            "default": self.default
+        }
 
 class SelectMenu(MessageComponent):
     type: int = MESSAGE_COMPONENT_TYPES.SELECT_MENU
@@ -165,18 +221,41 @@ class SelectMenu(MessageComponent):
     min_values: int
     max_values: int
     disabled: bool = False
-    def __init__(self, custom_id: str, options: list, placeholder: str, min_values: int, max_values: int, disabled: bool = False) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, custom_id, options, placeholder, min_values, max_values, disabled = False):
+        self.custom_id = custom_id
+        self.options = options
+        self.placeholder = placeholder
+        self.min_values = min_values
+        self.max_values = max_values
+        self.disabled = disabled
+    def __iter__(self):
+        return {
+            "custom_id": self.custom_id,
+            "options": self.options,
+            "placeholder": self.placeholder,
+            "min_values": self.min_values,
+            "max_values": self.max_values,
+            "disabled": self.disabled
+        }
 
 class TextInput(MessageComponent):
-    type: int = MESSAGE_COMPONENT_TYPES.TEXT_INPUT
-    custom_id: str
-    style: int
-    label: str
-    min_length: int
-    max_length: int
-    required: bool
-    value: str
-    placeholder: str
-    def __init__(self, custom_id: str, style: int, label: str, min_length: int, max_length: int, required: bool, value: str, placeholder: str) -> None: ...
-    def __iter__(self) -> dict: ...
+    def __init__(self, custom_id, style, label, min_length, max_length, required, value, placeholder):
+        self.custom_id = custom_id
+        self.style = style
+        self.label = label
+        self.min_length = min_length
+        self.max_length = max_length
+        self.required = required
+        self.value = value
+        self.placeholder = placeholder
+    def __iter__(self):
+        return {
+            "custom_id": self.custom_id,
+            "style": self.style,
+            "label": self.label,
+            "min_length": self.min_length,
+            "max_length": self.max_length,
+            "required": self.required,
+            "value": self.value,
+            "placeholder": self.placeholder
+        }

@@ -1,8 +1,8 @@
 """Websocket for Gateway"""
 
-from enum import Enum
+from enum import IntEnum
 
-class HTTP_CODES(Enum):
+class HTTP_CODES(IntEnum):
     OK = 200
     CREATED = 201
     NO_CONTENT = 204
@@ -15,6 +15,3 @@ class HTTP_CODES(Enum):
     TOO_MANY_REQUESTS = 429
     INTERNAL_SERVER_ERROR = 500
     GATEWAY_UNAVAILABLE = 502
-
-class Socket:
-    ...
