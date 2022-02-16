@@ -7,7 +7,7 @@ import json
 option = dict
 choice = dict
 
-def create_option(name: str, desc: str, option_type: int, required: bool, choices: list(str) = None) -> option: ...
+def create_option(name: str, desc: str, option_type: int, required: bool, choices: list = None) -> option: ...
 
 class COMMAND_TYPE(Enum):
     """Enum for command types"""
@@ -19,8 +19,8 @@ class Command:
     name: str
     _type: int
     description: str
-    options: list(option) = None
-    guild_ids: list(int) = None
+    options: list = None
+    guild_ids: list = None
     default_perms: bool = True
     permissions: dict = None
     handler: Callable[...,Any] = None
@@ -39,7 +39,7 @@ class Command:
             return json.loads(json.dumps(_dict))
         except:
             return None
-    def __init__(self, name: str, description: str, options: list(option) = None) -> None: ...
+    def __init__(self, name: str, description: str, options: list = None) -> None: ...
     def __call__(self, *args: Any, **kwds: Any) -> Any: ... # calls the handler function with the given args?
 
 class SlashCommand(Command):
