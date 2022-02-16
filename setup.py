@@ -6,7 +6,7 @@ setup(
     description='Discord slash command wrapper',
     author='Josh Brown, Matt Dray',
     license='MIT',
-    install_requires=['requests'],
+    install_requires=['requests', 'websockets'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     test_suite='tests',
