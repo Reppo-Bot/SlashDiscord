@@ -94,7 +94,7 @@ class Client:
     async def _heartbeatLoop(self) -> None:
         heartbeat = {
             "op": 1,
-            "d": "null"
+            "d": None
         }
         heartbeat = json.dumps(heartbeat)
         heartbeatTime = self.heartbeat_interval * .0001
