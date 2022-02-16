@@ -2,3 +2,4 @@ build
 dist
 slashReppo.egg-info
 testing.py
+**__pycache__**
