@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 setup(
     name='slashReppo',
-    packages=find_packages(include=['slashReppo']),
+    packages=find_packages(),
     version='0.0.1',
     description='Discord slash command wrapper',
     author='Josh Brown, Matt Dray',

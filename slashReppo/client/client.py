@@ -55,7 +55,7 @@ class Client:
         try:
             for command in self.commands:
                 for id in command.guild_ids:
-                    url = f"https://discord.com/api/v8/applications/{self.app_id}/guilds/{id}/commands"
+                    url = f"https://discord.com/api/v9/applications/{self.app_id}/guilds/{id}/commands"
                     r = requests.post(url, headers=header, json=command.json())
                     registered.append(f"{url}/{r.command_id}")
             print("Successfully registered all commands")
