@@ -1,9 +1,10 @@
 class EmbedFooter:
-    def __init__(self, text: str = None, icon_url: str = None, proxy_icon_url: str = None) -> None:
+    def __init__(self, text=None, icon_url=None, proxy_icon_url=None):
         self.text = text
         self.icon_url = icon_url
         self.proxy_icon_url = proxy_icon_url
-    def __iter__(self) -> dict:
+
+    def __iter__(self):
         return {
             "text": self.text,
             "icon_url": self.icon_url,
@@ -11,11 +12,12 @@ class EmbedFooter:
         }
 
 class EmbedImage:
-    def __init__(self, url = None, proxy_url = None, height = None, width = None):
+    def __init__(self, url=None, proxy_url=None, height=None, width=None):
         self.url = url
         self.proxy_url = proxy_url
         self.height = height
         self.width = width
+
     def __iter__(self):
         return {
             "url": self.url,
@@ -25,9 +27,10 @@ class EmbedImage:
         }
 
 class EmbedProvider:
-    def __init__(self, name = None, url = None):
+    def __init__(self, name=None, url=None):
         self.name = name
         self.url = url
+
     def __iter__(self):
         return {
             "name": self.name,
@@ -35,7 +38,7 @@ class EmbedProvider:
         }
 
 class EmbedAuthor:
-    def __init__(self, name = None, url = None, icon_url = None, proxy_icon_url = None):
+    def __init__(self, name=None, url=None, icon_url=None, proxy_icon_url=None):
         self.name = name
         self.url = url
         self.icon_url = icon_url
@@ -50,10 +53,11 @@ class EmbedAuthor:
         }
 
 class EmbedField:
-    def __init__(self, name = None, value = None, inline = None):
+    def __init__(self, name=None, value=None, inline=None):
         self.name = name
         self.value = value
         self.inline = inline
+
     def __iter__(self):
         return {
             "name": self.name,
@@ -62,7 +66,7 @@ class EmbedField:
         }
 
 class Embed:
-    def __init__(self, title, type, description, url, timestamp, color = None, footer = None, image = None, thumbnail = None, video = None, provider = None, author = None, fields = None):
+    def __init__(self, title, type, description, url, timestamp, color=None, footer=None, image=None, thumbnail=None, video=None, provider=None, author=None, fields=None):
         self.title = title
         self.type = type
         self.description = description
@@ -76,6 +80,7 @@ class Embed:
         self.provider = provider
         self.author = author
         self.fields = fields
+
     def __iter__(self) -> dict:
         return {
             "title": self.title,

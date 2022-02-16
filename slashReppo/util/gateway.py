@@ -1,7 +1,8 @@
 """For managing the gateway"""
 
 from enum import IntEnum, Flag
-from typing import OrderedDict
+from dataclasses import InitVar, dataclass
+
 
 GATEWAY_VERSION = 9
 
@@ -337,8 +338,21 @@ class GATEWAY_INTENTS(Flag):
     # APPLICATION_COMMAND_DELETE
     # INTERACTION_CREATE
 
-class Payload(OrderedDict):
-    op: int = None # opcode
-    d: dict = None # data
-    s: int = None # seq num
-    t: str = None # event name
+class Payload:
+    __slots__ = ('op', 'd', 's', 't')
+
+    def __init__(self, payload=None):
+        if payload:
+            self.op = payload['op']
+            self.d = payload['d']
+            self.s = payload['s']
+            self.t = payload['t']
+        else:
+            self.op = None
+            self.d = None
+            self.s = None
+            self.t = None
+    def __iter__(self):
+        return {'op': self.op, 'd': self.d, 's': self.s, 't': self.t}.__iter__()
+    def __repr__(self) -> str:
+        return str(self.__iter__())

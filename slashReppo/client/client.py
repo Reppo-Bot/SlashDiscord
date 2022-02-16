@@ -5,49 +5,48 @@ import json
 import asyncio
 import websockets
 import requests
-from ..util.gateway import GATEWAY_OPCODES
+from ..util.gateway import GATEWAY_OPCODES, Payload
 
 BASE_URL = 'https://discord.com/api/v9'
 API_VERSION = "/?v=9&encoding=json"
 
 class Client:
-    commands: list
-    command_cache: OrderedDict[str, Any]
-    event_cache: OrderedDict[str, Any]
-    client_events: OrderedDict[str, Any]
-    _token: str
-    _app_id: str
-    heartbeat_interval: int # miliseconds
-    initial_heartbeat: int # heartbeat * rand(0->1)
-    websocket: Any
-    intents: int
-    def __init__(self, token, intents, app_id, commands=[]) -> None:
+    def __init__(self, token, intents, app_id, commands=[]):
         self._token     = token
         self.intents    = intents
         self._app_id    = app_id
         self.commands   = commands
-    def __call__(self, *args: Any, **kwds: Any) -> Any: ...
-    def push(self, command) -> None:
+        self.command_cache = OrderedDict()
+        self.event_cache = OrderedDict()
+
+    def __call__(self, *args, **kwds): ... # todo
+
+    def push(self, command):
         self.command_cache[command.name] = command.handler
         self.commands.push(command)
-    def push(self, commands) -> None:
+
+    def push(self, commands):
         for command in commands:
             self.push(command)
-    def on(self, event, callback) -> None:
+
+    def on(self, event, callback):
         self.event_cache[event] = callback
-    def connect(self) -> bool:
+
+    def connect(self):
         payload = requests.get(BASE_URL + "/gateway/bot", headers={"Authorization": "Bot " + self._token})
         res = payload.json()
         print(res)
         websocketUrl = res["url"] + API_VERSION
         asyncio.run(self._startup(websocketUrl))
-    def disconnect() -> bool: ...
-    def register(self) -> bool:
+
+    def disconnect(): ... # todo
+
+    def register(self):
         for command in self.commmands:
             try:
                 if (command.json() == None):
                     raise f"Invalid command {command.str()}"
-            except Exception(e):
+            except Exception as e:
                 print(e)
                 return False
         header = {"Authorization": f"Bot {self._token}"}
@@ -66,13 +65,19 @@ class Client:
                 if(r.status != 200):
                     print(f"Faield to deregister {url}")
             print("Successfully deregistered partial command set")
-    async def _startup(self, websocketUrl) -> bool:
+
+    async def _startup(self, websocketUrl):
         self.websocket = await websockets.connect(websocketUrl, ping_interval=None)
+        # helloResponse = Payload(json.loads(await self.websocket.recv()))
         helloResponse = json.loads(await self.websocket.recv())
         print(helloResponse)
+
+        # if(helloResponse.op != GATEWAY_OPCODES.HELLO.value):
+        
         if(helloResponse["op"] != GATEWAY_OPCODES.HELLO.value):
             print("Error: Unexpected init opcode")
             return False
+        # self.heartbeat_interval = helloResponse.d["heartbeat_interval"]
         self.heartbeat_interval = helloResponse["d"]["heartbeat_interval"]
         response = {
             "op": 2,
@@ -88,10 +93,12 @@ class Client:
         }
         await self.websocket.send(json.dumps(response))
         await asyncio.gather(self._loop(), self._heartbeatLoop(),)
-    async def _loop(self) -> None:
+
+    async def _loop(self):
         async for message in self.websocket:
             print(message)
-    async def _heartbeatLoop(self) -> None:
+            
+    async def _heartbeatLoop(self):
         heartbeat = {
             "op": 1,
             "d": None

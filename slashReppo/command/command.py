@@ -7,40 +7,46 @@ import json
 option = dict
 choice = dict
 
-def create_option(name: str, desc: str, option_type: int, required: bool, choices: list = None) -> option: ...
-
 class COMMAND_TYPE(Enum):
-    """Enum for command types"""
     CHAT_INPUT = 1
     USER = 2
     MESSAGE = 3
 
+def create_option(name, desc, option_type, required, choices=None): ... # todo
+
 class Command:
-    name: str
-    _type: int
-    description: str
-    options: list = None
-    guild_ids: list = None
-    default_perms: bool = True
-    permissions: dict = None
-    handler: Callable[...,Any] = None
-    def json(self) -> dict:
+    def __init__(self, name, type, description, options=None, guild_ids=None, default_perms=True, permissions=None, handler=None):
+        self.name = name
+        self._type = type
+        self.description = description
+        self.options = options
+        self.guild_ids = guild_ids
+        self.default_perms = default_perms
+        self.permissions = permissions
+        self.handler = handler
+
+    def __call__(self, *args, **kwds): ... # todo??
+
+    def json(self):
         _dict = {
             "name": self.name.lower(),
             "type": self._type,
             "default_permission": self.default_perms,
-            "description": self.description
+            "description": self.description,
+            "options": self.options,
+            "permissions": self.permissions
         }
-        if (self.options != None and self.options.length() != 0):
-            _dict["options"] = self.options
-        if (self.permissions != None):
-            _dict["permissions"] = self.permissions
         try:
             return json.loads(json.dumps(_dict))
         except:
             return None
-    def __init__(self, name: str, description: str, options: list = None) -> None: ...
-    def __call__(self, *args: Any, **kwds: Any) -> Any: ... # calls the handler function with the given args?
 
 class SlashCommand(Command):
-    _type: int = COMMAND_TYPE.CHAT_INPUT
+    def __init__(self, name, description, options=None, guild_ids=None, default_perms=True, permissions=None, handler=None):
+        super().__init__(name, description, options, guild_ids, default_perms, permissions, handler)
+        self._type = COMMAND_TYPE.CHAT_INPUT.value
+    
+    def __iter__(self) -> dict:
+        return self.json()
+    
+    

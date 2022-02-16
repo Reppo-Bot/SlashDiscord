@@ -22,8 +22,12 @@ class RPC_CLOSE_EVENT_CODES(IntEnum): ...
 
 class GATEWAY_INTENTS(Flag): ...
 
-class Payload(OrderedDict):
-    op: int = None # opcode
-    d: dict = None # data
-    s: int = None # seq num
-    t: str = None # event name
+class Payload:
+    op: int=None # opcode
+    d: dict=None # data
+    s: int=None # seq num
+    t: str=None # event name
+    def __init__(self, payload: dict=None) -> None: ...
+    def __iter__(self) -> None: ...
+    def __repr__(self) -> str: ...
+    
