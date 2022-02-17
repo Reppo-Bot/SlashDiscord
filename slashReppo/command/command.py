@@ -48,5 +48,4 @@ class SlashCommand(Command):
     
     def __iter__(self) -> dict:
         return self.json()
-    
-    
+        

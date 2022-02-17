@@ -1,5 +1,6 @@
 """For managing the gateway"""
 
+import json
 from enum import IntEnum, Flag
 from dataclasses import InitVar, dataclass
 
@@ -341,12 +342,13 @@ class GATEWAY_INTENTS(Flag):
 class Payload:
     __slots__ = ('op', 'd', 's', 't')
 
-    def __init__(self, payload=None):
+    def __init__(self, payload):
         if payload:
-            self.op = payload['op']
-            self.d = payload['d']
-            self.s = payload['s']
-            self.t = payload['t']
+            _payload = json.loads(payload)
+            self.op = _payload['op']
+            self.d = _payload['d']
+            self.s = _payload['s']
+            self.t = _payload['t']
         else:
             self.op = None
             self.d = None
