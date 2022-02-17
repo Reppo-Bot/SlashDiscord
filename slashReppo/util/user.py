@@ -1,5 +1,5 @@
 class User:
-    def __init__(self, id = None, username = None, avatar = None, discriminator = None, public_flags = None):
+    def __init__(self, id=None, username=None, avatar=None, discriminator=None, public_flags=None):
         self.id = id
         self.username = username
         self.avatar = avatar
@@ -15,7 +15,7 @@ class User:
         }
 
 class Member:
-    def __init__(self, user = None, roles = None, premium_since = None, permissions = None, pending = False, nick = None, mute = False, joined_at = None, is_pending = False, deaf = False):
+    def __init__(self, user=None, roles=None, premium_since=None, permissions=None, pending=False, nick=None, mute=False, joined_at=None, is_pending=False, deaf=False):
         self.user = user
         self.roles = roles
         self.premium_since = premium_since
