@@ -361,4 +361,5 @@ class Payload:
         yield "t", self.t
 
     def __repr__(self) -> str:
-        return str(self.__iter__())
+        _dict = dict(self)
+        return json.dumps(_dict)
