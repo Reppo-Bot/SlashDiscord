@@ -17,6 +17,9 @@ class Client:
     intents: int
     _session_id: str
     _last_sequence: int
+    _heartbeat_heard: bool
+    _can_resume: bool
+    _die: bool
     def __init__(self, token, intents, app_id, commands=None) -> None: ...
     def __call__(self, *args: Any, **kwds: Any) -> Any: ...
     def push(self, c: Command | list(Command)) -> None: ...
