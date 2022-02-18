@@ -345,16 +345,20 @@ class Payload:
     def __init__(self, payload):
         if payload:
             _payload = json.loads(payload)
-            self.op = _payload['op']
-            self.d = _payload['d']
-            self.s = _payload['s']
-            self.t = _payload['t']
+            self.op = _payload['op'] if 'op' in _payload else None
+            self.d = _payload['d'] if 'd' in _payload else None
+            self.s = _payload['s'] if 's' in _payload else None
+            self.t = _payload['t'] if 't' in _payload else None
         else:
             self.op = None
             self.d = None
             self.s = None
             self.t = None
     def __iter__(self):
-        return {'op': self.op, 'd': self.d, 's': self.s, 't': self.t}.__iter__()
+        yield "op", self.op
+        yield "d", self.d
+        yield "s", self.s
+        yield "t", self.t
+
     def __repr__(self) -> str:
         return str(self.__iter__())
