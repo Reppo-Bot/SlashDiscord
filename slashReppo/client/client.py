@@ -23,13 +23,17 @@ class Client:
 
     def __call__(self, *args, **kwds): ... # todo
 
-    def push(self, command):
-        self.command_cache[command.name] = command.handler
-        self.commands.push(command)
+    def push(self, c):
+        if not c:
+            raise Exception("Invalid command")
 
-    def push(self, commands):
-        for command in commands:
-            self.push(command)
+        if(type(c) is list):
+            for command in c:
+                self.commands.append(command)
+                self.command_cache[command.name] = command.handler
+        else:
+            self.command_cache[c.name] = c.handler
+            self.commands.append(c)
 
     def on(self, event, callback):
         self.event_cache[event] = callback
