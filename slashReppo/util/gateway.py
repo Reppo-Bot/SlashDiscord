@@ -344,7 +344,7 @@ class Payload:
 
     def __init__(self, payload):
         if payload:
-            _payload = json.loads(payload)
+            _payload = json.loads(payload) if type(payload) is str else payload
             self.op = _payload['op'] if 'op' in _payload else None
             self.d = _payload['d'] if 'd' in _payload else None
             self.s = _payload['s'] if 's' in _payload else None
