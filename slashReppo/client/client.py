@@ -20,7 +20,6 @@ class Client:
         self.command_cache = OrderedDict()
         self.event_cache = OrderedDict()
         self.heartbeat = Payload({"op": 1,"d": None})
-
     def __call__(self, *args, **kwds): ... # todo
 
     def push(self, c):
@@ -94,6 +93,11 @@ class Client:
             }
         })
         await self.websocket.send(str(response))
+        ready = Payload(await self.websocket.recv())
+        if(ready.t != "READY"):
+            print("Failed to receive READY")
+            return
+        self.session_id = ready.d["session_id"]
         await asyncio.gather(self._loop(), self._heartbeatLoop(),)
 
     async def _loop(self):
