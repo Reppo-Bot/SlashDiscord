@@ -18,6 +18,7 @@ class Client:
         self.commands   = commands
         self.command_cache = OrderedDict()
         self.event_cache = OrderedDict()
+        self.heartbeat = Payload({"op": 1,"d": None})
 
     def __call__(self, *args, **kwds): ... # todo
 
@@ -75,7 +76,7 @@ class Client:
             print("Error: Unexpected init opcode")
             return False
         self.heartbeat_interval = helloResponse.d["heartbeat_interval"]
-        response = {
+        response = Payload({
             "op": 2,
             "d": {
                 "token": self._token,
@@ -86,25 +87,25 @@ class Client:
                     "$device": "slash-reppo"
                 }
             }
-        }
-        await self.websocket.send(json.dumps(response))
+        })
+        await self.websocket.send(str(response))
         await asyncio.gather(self._loop(), self._heartbeatLoop(),)
 
     async def _loop(self):
         async for message in self.websocket:
-            payload = Payload(message)
-            print(payload)
+            _payload = Payload(message)
+            print(_payload)
+            if(_payload.op == GATEWAY_OPCODES.HEARTBEAT.value):
+                print("Beat Requested! Beating")
+                await self.websocket.send(str(self.heartbeat))
+                continue
 
     async def _heartbeatLoop(self):
-        heartbeat = {
-            "op": 1,
-            "d": None
-        }
-        heartbeat = json.dumps(heartbeat)
         heartbeatTime = self.heartbeat_interval * .0001
-        await self.websocket.send(heartbeat)
+        await self.websocket.send(str(self.heartbeat))
+        print("Beating at", heartbeatTime)
         await asyncio.sleep(heartbeatTime * .7)
         while True:
-            print("Beating", heartbeatTime)
-            await self.websocket.send(heartbeat)
+            print("Beating")
+            await self.websocket.send(str(self.heartbeat))
             await asyncio.sleep(heartbeatTime)
