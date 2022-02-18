@@ -6,6 +6,7 @@ import asyncio
 import websockets
 import requests
 from ..util.gateway import GATEWAY_OPCODES, Payload
+import platform
 
 BASE_URL = 'https://discord.com/api/v9'
 API_VERSION = "/?v=9&encoding=json"
@@ -82,7 +83,7 @@ class Client:
                 "token": self._token,
                 "intents": self.intents,
                 "properties": {
-                    "$os": "linux",
+                    "$os": platform.system(),
                     "$browser": "slash-reppo",
                     "$device": "slash-reppo"
                 }
