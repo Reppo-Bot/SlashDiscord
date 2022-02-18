@@ -68,22 +68,18 @@ class Client:
 
     async def _startup(self, websocketUrl):
         self.websocket = await websockets.connect(websocketUrl, ping_interval=None)
-        # helloResponse = Payload(json.loads(await self.websocket.recv()))
-        helloResponse = json.loads(await self.websocket.recv())
+        helloResponse = Payload(await self.websocket.recv())
         print(helloResponse)
 
-        # if(helloResponse.op != GATEWAY_OPCODES.HELLO.value):
-        
-        if(helloResponse["op"] != GATEWAY_OPCODES.HELLO.value):
+        if(helloResponse.op != GATEWAY_OPCODES.HELLO.value):
             print("Error: Unexpected init opcode")
             return False
-        # self.heartbeat_interval = helloResponse.d["heartbeat_interval"]
-        self.heartbeat_interval = helloResponse["d"]["heartbeat_interval"]
+        self.heartbeat_interval = helloResponse.d["heartbeat_interval"]
         response = {
             "op": 2,
             "d": {
                 "token": self._token,
-                "intents": 513,
+                "intents": self.intents,
                 "properties": {
                     "$os": "linux",
                     "$browser": "slash-reppo",
@@ -96,8 +92,9 @@ class Client:
 
     async def _loop(self):
         async for message in self.websocket:
-            print(message)
-            
+            payload = Payload(message)
+            print(payload)
+
     async def _heartbeatLoop(self):
         heartbeat = {
             "op": 1,
@@ -106,7 +103,7 @@ class Client:
         heartbeat = json.dumps(heartbeat)
         heartbeatTime = self.heartbeat_interval * .0001
         await self.websocket.send(heartbeat)
-        asyncio.sleep(heartbeatTime * .7)
+        await asyncio.sleep(heartbeatTime * .7)
         while True:
             print("Beating", heartbeatTime)
             await self.websocket.send(heartbeat)
