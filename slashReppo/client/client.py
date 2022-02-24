@@ -48,6 +48,7 @@ class Client:
         payload = requests.get(BASE_URL + "/gateway/bot", headers={"Authorization": "Bot " + self._token})
         res = payload.json()
         self.logger.debug(res)
+        print(f"Session start limit: {res['session_start_limit']['remaining']}")
         websocketUrl = res["url"] + API_VERSION
         asyncio.run(self._startup(websocketUrl))
 
@@ -88,7 +89,7 @@ class Client:
         while True:
             self.websocket = await websockets.connect(websocketUrl, ping_interval=None)
             helloResponse = Payload(await self.websocket.recv())
-            self.logger.debug(helloResponse)
+            self.logger.debug(f"Hello Response: {helloResponse}")
             if(helloResponse.op != GATEWAY_OPCODES.HELLO.value):
                 print("Error: Unexpected init opcode")
                 self.logger.error("Unexpected init opcode")
@@ -128,7 +129,7 @@ class Client:
                     self.logger.error("Failed to get READY from discord")
                     self.logger.error(f"Received payload: {ready}")
                     return
-                self.logger.debug(ready)
+                self.logger.debug(str(ready))
                 self._heartbeat_heard = True
                 self.session_id = ready.d["session_id"]
                 self._last_sequence = ready.s
