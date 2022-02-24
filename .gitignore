@@ -1,4 +1,6 @@
 build
 dist
 slashReppo.egg-info
-testing.py
+playground*.py
+**__pycache__**
+*.log

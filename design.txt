@@ -20,18 +20,27 @@ users concerns
 
 
 # example
-from ourLib import Client, Command, Options, Interaction, register_commands
+from ourLib.client import Client, Command, Options, Interaction
+from ourLib.command import SlashCommand, Option 
 
-client = Client('token', intents=[])
+try:
+    client = Client('token', intents=[])
+catch Exception e:
+    print(e)
+    break
 
-commands = []
-
-async def hello_handler(interaction):
+async def hello_handler(interaction: Interaction):
     interaction.reply('hello')
 
 
+# 3 ways?
+Command(name='Hello', ...)
+client.push(commands)
+or Client(token='token', intents=[], commands=[Command])
+
+
 # discord slash commands
-client.push(new Command(name='Hello', desc='I am a command', options=[stuff: Options], guild_id=123456, handler=hello_handler))
+client.push(new Command(name='Hello', desc='I am a command', options=[stuff: Option], guild_id=123456, guild_ids, handler=hello_handler))
 
 if !client.register():
     throw 'failed to register commands'
@@ -39,15 +48,12 @@ if !client.register():
 # event handling for discord
 client.on('death', function)
 
-if !client.connected:
+if !client.connect():
     throw 'Failed to Connect'
 
-client()
+client() # used to run the bot
 
-event dict
-
-
-class Client : Stack:
+class Client(Stack):
     # init
     command_dict
     event_dict
@@ -68,3 +74,6 @@ class Interaction
 class Guild
 
 static enum of intents
+
+socket for connection
+

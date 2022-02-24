@@ -1,1 +1,1 @@
-from .wrapper import ping
+from .client import Client
