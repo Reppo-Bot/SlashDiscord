@@ -7,22 +7,26 @@ import websockets
 import requests
 from ..util.gateway import GATEWAY_OPCODES, GATEWAY_CLOSE_CODES, Payload
 import platform
+import logging
 
 BASE_URL = 'https://discord.com/api/v9'
 API_VERSION = "/?v=9&encoding=json"
 
 class Client:
-    def __init__(self, token, intents, app_id, commands=[]):
-        self._token     = token
-        self.intents    = intents
-        self._app_id    = app_id
-        self.commands   = commands
-        self.command_cache = OrderedDict()
-        self.event_cache = OrderedDict()
-        self.heartbeat = Payload({"op": 1,"d": None})
-        self._reconnect = False
-        self._die = False
-        self._can_resume = False
+    def __init__(self, token, intents, app_id, commands=[], log_level=0, log_file="slashReppo.log"):
+        self._token         = token
+        self.intents        = intents
+        self._app_id        = app_id
+        self.commands       = commands
+        self.command_cache  = OrderedDict()
+        self.event_cache    = OrderedDict()
+        self.heartbeat      = Payload({"op": 1,"d": None})
+        self._reconnect     = False
+        self._die           = False
+        self._can_resume    = False
+        logging.basicConfig(filename=log_file, encoding='utf-8', level=log_level)
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(log_level)
     def __call__(self, *args, **kwds): ... # todo
 
     def push(self, c):
@@ -43,7 +47,7 @@ class Client:
     def connect(self):
         payload = requests.get(BASE_URL + "/gateway/bot", headers={"Authorization": "Bot " + self._token})
         res = payload.json()
-        print(res)
+        self.logger.debug(res)
         websocketUrl = res["url"] + API_VERSION
         asyncio.run(self._startup(websocketUrl))
 
@@ -55,7 +59,7 @@ class Client:
                 if (command.json() == None):
                     raise f"Invalid command {command.str()}"
             except Exception as e:
-                print(e)
+                self.logger.error(e)
                 return False
         header = {"Authorization": f"Bot {self._token}"}
         registered = []
@@ -63,29 +67,34 @@ class Client:
             for command in self.commands:
                 for id in command.guild_ids:
                     url = f"https://discord.com/api/v9/applications/{self.app_id}/guilds/{id}/commands"
+                    self.logger.debug(f"Registering: {url}")
                     r = requests.post(url, headers=header, json=command.json())
                     registered.append(f"{url}/{r.command_id}")
             print("Successfully registered all commands")
+            self.logger.info("Registered all commands")
         except Exception(e):
             print("Failed to regeister some commands, attempting to deregister posted ones...")
+            self.logger.error(e)
+            self.logger.error("Command registration failed")
             for url in registered:
                 r = requests.delete(url)
                 if(r.status != 200):
                     print(f"Faield to deregister {url}")
+                    self.logger.error(f"Failed to deregister {url}")
             print("Successfully deregistered partial command set")
+            self.logger.info("Deregistered partial command set")
 
     async def _startup(self, websocketUrl):
         while True:
-            print()
-            print("Restarted Bot")
-            print()
             self.websocket = await websockets.connect(websocketUrl, ping_interval=None)
             helloResponse = Payload(await self.websocket.recv())
-            print(helloResponse)
+            self.logger.debug(helloResponse)
             if(helloResponse.op != GATEWAY_OPCODES.HELLO.value):
                 print("Error: Unexpected init opcode")
+                self.logger.error("Unexpected init opcode")
                 return False
             self.heartbeat_interval = helloResponse.d["heartbeat_interval"]
+            self.logger.debug(f"HEARTBEAT: {self.heartbeat_interval}")
             if(self._can_resume):
                 self._can_resume = False
                 resume = Payload({
@@ -96,6 +105,7 @@ class Client:
                         "seq": self._last_sequence
                     }
                 })
+                self.logger.debug(f'Attempting to resume with payload: {resume}')
                 await self.websocket.send(str(resume))
             else:
                 response = Payload({
@@ -110,25 +120,27 @@ class Client:
                         }
                     }
                 })
+                self.logger.debug(f'Attempting to connect with payload: {response}')
                 await self.websocket.send(str(response))
                 ready = Payload(await self.websocket.recv())
                 if(ready.t != "READY"):
                     print("Failed to receive READY")
+                    self.logger.error("Failed to get READY from discord")
+                    self.logger.error(f"Received payload: {ready}")
                     return
-                print(ready)
+                self.logger.debug(ready)
                 self._heartbeat_heard = True
                 self.session_id = ready.d["session_id"]
                 self._last_sequence = ready.s
 
+            print("Successfully connected to discord!")
             done, pending = await asyncio.wait(
                 [self._loop(), self._heartbeatLoop()],
                 return_when=asyncio.FIRST_COMPLETED)
             for task in pending:
                 task.cancel()
             if(self._can_resume):
-                print()
-                print("Attempting to resume")
-                print()
+                self.logger.waring("Attempting to resume")
                 await self.websocket.close(code=4099, reason="Attempting Resume")
                 continue
 
@@ -159,6 +171,8 @@ class Client:
                                 GATEWAY_CLOSE_CODES.SESSION_TIMED_OUT.value]):
                 print(f"Error: {GATEWAY_CLOSE_CODES(_payload.op)}")
                 print("Trying to Reconnect")
+                self.logger.error(f"Bad opcode: {GATEWAY_CLOSE_CODES(_payload.op)}")
+                self.logger.error("Attempting to reconnect")
                 return
             if(_payload.op in [GATEWAY_CLOSE_CODES.AUTHENTICATION_FAILED.value,
                             GATEWAY_CLOSE_CODES.INVALID_SHARD.value,
@@ -169,9 +183,11 @@ class Client:
                 self._die = True
                 print(f"Error: {GATEWAY_OPCODES(_payload.op)}")
                 print("Cannot Reconnect. Starting shutdown")
+                self.logger.error(f"Bad opcode: {GATEWAY_CLOSE_CODES(_payload.op)}")
+                self.logger.error("Shutdown")
                 return
             if(_payload.op == GATEWAY_OPCODES.HEARTBEAT.value):
-                print("Beat Requested! Beating")
+                self.logger.warning(f"Heartbeat requested!")
                 await self.websocket.send(str(self.heartbeat))
                 continue
 
@@ -179,12 +195,12 @@ class Client:
         heartbeatTime = self.heartbeat_interval * .0001
         await self.websocket.send(str(self.heartbeat))
         self._heartbeat_heard = False
-        print("Beating at", heartbeatTime)
+        self.logger.debug(f"Beating at {heartbeatTime}")
         await asyncio.sleep(heartbeatTime * .7)
         while self._heartbeat_heard:
-            print("Beating")
             await self.websocket.send(str(self.heartbeat))
             self._heartbeat_heard = False
             await asyncio.sleep(heartbeatTime)
+        self.logger.error("Detected disconnect. Trying reconnect")
         print("Disconnect detected, trying to reconnect...")
         self._can_resume = True
