@@ -3,3 +3,4 @@ dist
 slashReppo.egg-info
 playground*.py
 **__pycache__**
+*.log
