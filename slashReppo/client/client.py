@@ -1,6 +1,7 @@
 """ This module is resposnible for holding the client for the library"""
 from typing import OrderedDict, Any
 from ..command.command import Command
+from ..util.interaction import Interaction
 import json
 import asyncio
 import websockets
@@ -10,6 +11,7 @@ import platform
 import logging
 import signal
 import sys
+import requests
 
 BASE_URL = 'https://discord.com/api/v9'
 API_VERSION = "/?v=9&encoding=json"
@@ -206,6 +208,17 @@ class Client:
                 self.logger.warning(f"Heartbeat requested!")
                 await self.websocket.send(str(self.heartbeat))
                 continue
+            if(_payload.op == GATEWAY_OPCODES.DISPATCH.value and _payload.t == "INTERACTION_CREATE"):
+                res = self.command_cache[_payload.d['data']['name']]()
+                interaction = Interaction(_payload.d)
+                url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
+                json = {
+                    "type": 4,
+                    "data": {
+                        "content": res
+                    }
+                }
+                r = requests.post(url, json=json)
 
     async def _heartbeatLoop(self):
         heartbeatTime = self.heartbeat_interval * .0001
