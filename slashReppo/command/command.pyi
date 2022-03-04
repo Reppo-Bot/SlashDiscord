@@ -21,7 +21,6 @@ class Command:
     permissions: dict = None
     handler: Callable[...,Any] = None
     def __init__(self, name: str, type: int, description: str, options: list(option) = None) -> None: ...
-    def __call__(self, *args: Any, **kwds: Any) -> Any: ... # calls the handler function with the given args?
     def json(self) -> dict: ...
 
 class SlashCommand(Command):

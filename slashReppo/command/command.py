@@ -28,8 +28,6 @@ class Command:
     def __repr__(self):
         return str(self.json())
 
-    def __call__(self, *args, **kwds): ... # todo??
-
     def json(self):
         return {
             "name" : self.name,
