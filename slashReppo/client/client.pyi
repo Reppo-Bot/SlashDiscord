@@ -25,7 +25,7 @@ class Client:
     _die: bool
     log_level: int
     def __init__(self, token, intents, app_id, commands=[], log_level=0, log_file="slashReppo.log") -> None: ...
-    """Initialization of client class 
+    """Initialization of client class
 
     :param token: discord bot token
     :type token: str
@@ -45,6 +45,11 @@ class Client:
         requests
     """
     def push(self, c: Command | list(Command)) -> None: ...
+    """Push commands to the client's list of commands
+
+    :param c: list, or single command for the bot to map registerd commands to.
+    :type c: list(slashReppo.command) | slashReppo.command
+    """
     def on(self, event, callback) -> None: ...
     def connect(self) -> bool: ...
     def disconnect(self) -> bool: ...
