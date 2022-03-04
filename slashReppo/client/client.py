@@ -33,7 +33,6 @@ class Client:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
         signal.signal(signal.SIGINT, self.disconnect)
-    def __call__(self, *args, **kwds): ... # todo
 
     def push(self, c):
         if not c:
