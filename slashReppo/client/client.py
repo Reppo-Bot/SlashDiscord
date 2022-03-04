@@ -87,12 +87,16 @@ class Client:
                     url = f"https://discord.com/api/v9/applications/{self._app_id}/commands"
                     self.logger.debug(f"Registering: {url}")
                     r = requests.post(url, headers=header, json=command.json())
+                    self.logger.debug(r.json())
+                    self.logger.debug(r.status_code)
                     registered.append(f"{url}/{r.json()['id']}")
                     continue
                 for id in command.guild_ids:
                     url = f"https://discord.com/api/v9/applications/{self._app_id}/guilds/{id}/commands"
                     self.logger.debug(f"Registering: {url}")
                     r = requests.post(url, headers=header, json=command.json())
+                    self.logger.debug(r.json())
+                    self.logger.debug(r.status_code)
                     registered.append(f"{url}/{r.json()['id']}")
             print("Successfully registered all commands")
             self.logger.info("Registered all commands")
