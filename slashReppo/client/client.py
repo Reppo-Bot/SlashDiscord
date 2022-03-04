@@ -21,7 +21,7 @@ class Client:
         self._token         = token
         self.intents        = intents
         self._app_id        = app_id
-        self.commands       = commands
+        self.commands       = commands if type(commands) == list else [commands]
         self.command_cache  = OrderedDict()
         self.event_cache    = OrderedDict()
         self.heartbeat      = Payload({"op": 1,"d": None})
