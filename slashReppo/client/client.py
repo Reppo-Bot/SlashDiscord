@@ -8,6 +8,8 @@ import requests
 from ..util.gateway import GATEWAY_OPCODES, GATEWAY_CLOSE_CODES, Payload
 import platform
 import logging
+import signal
+import sys
 
 BASE_URL = 'https://discord.com/api/v9'
 API_VERSION = "/?v=9&encoding=json"
@@ -24,9 +26,11 @@ class Client:
         self._reconnect     = False
         self._die           = False
         self._can_resume    = False
+        self.websocket      = None
         logging.basicConfig(filename=log_file, encoding='utf-8', level=log_level)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
+        signal.signal(signal.SIGINT, self.disconnect)
     def __call__(self, *args, **kwds): ... # todo
 
     def push(self, c):
@@ -52,7 +56,18 @@ class Client:
         websocketUrl = res["url"] + API_VERSION
         asyncio.run(self._startup(websocketUrl))
 
-    def disconnect(): ... # todo
+
+    def disconnect(self, *args):
+        print("\nStopping...")
+        try:
+            for task in asyncio.all_tasks():
+                task.cancel()
+            self.logger.debug("Exiting from user input")
+        except Exception as e:
+            print("Failed to close websocket, probably not running.")
+            print(e)
+            self.logging.error(f"Failed to gracefully exit: {e}")
+        sys.exit(0)
 
     def register(self):
         for command in self.commmands:
