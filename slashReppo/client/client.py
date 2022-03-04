@@ -77,7 +77,7 @@ class Client:
                     raise f"Invalid command {command.str()}"
             except Exception as e:
                 self.logger.error(e)
-                return False
+                return
         header = {"Authorization": f"Bot {self._token}"}
         registered = []
         try:
@@ -119,7 +119,7 @@ class Client:
             if(helloResponse.op != GATEWAY_OPCODES.HELLO.value):
                 print("Error: Unexpected init opcode")
                 self.logger.error("Unexpected init opcode")
-                return False
+                return
             self.heartbeat_interval = helloResponse.d["heartbeat_interval"]
             self.logger.debug(f"HEARTBEAT: {self.heartbeat_interval}")
             if(self._can_resume):
