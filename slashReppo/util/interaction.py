@@ -1,9 +1,7 @@
 """Interaction class for responses to commands"""
 
-from slashReppo.util.bitfield import Bitfield
-from slashReppo.util.embed import Embed
-from slashReppo.util.user import Member
 from enum import IntEnum
+from .user import Member
 
 # Enums
 class INTERACTION_CALLBACK_TYPES(IntEnum):
@@ -63,12 +61,12 @@ class MessageComponent:
     def __iter__(self) -> dict: ...
 
 class AllowedMentions:
-    def __init__(self, parse: list(str) = None, roles: list(str) = None, users: list(str) = None, replied_user: bool = None):
+    def __init__(self, parse: list() = None, roles: list() = None, users: list() = None, replied_user: bool = None):
         self.parse = parse
         self.roles = roles
         self.users = users
         self.replied_user = replied_user
-    def __iter__(self) -> dict: 
+    def __iter__(self) -> dict:
         return {
             "parse": self.parse,
             "roles": self.roles,
@@ -88,7 +86,7 @@ class Attachment:
         self.height = height
         self.width = width
         self.ephemeral = ephemeral
-    def __iter__(self) -> dict: 
+    def __iter__(self) -> dict:
         return {
             "id": self.id,
             "filename": self.filename,
@@ -122,16 +120,12 @@ class Message(InteractionCallbackData):
             "attachments": self.attachments
         }
 
-class Autocomplete(InteractionCallbackData):
-    type: int = INTERACTION_CALLBACK_TYPES.AUTOCOMPLETE
-    def __iter__(self) -> dict: ...
-
 class Modal(InteractionCallbackData):
-    def __init__(self, custom_id, title, components): 
+    def __init__(self, custom_id, title, components):
         self.custom_id = custom_id
         self.title = title
         self.components = components
-    def __iter__(self) -> dict: 
+    def __iter__(self) -> dict:
         return {
             "custom_id": self.custom_id,
             "title": self.title,
@@ -139,14 +133,17 @@ class Modal(InteractionCallbackData):
         }
 
 class Interaction:
-    def __init__(self, type: int, member, id, guild_id = None, channel_id = None, data = None):
-        self._type = type
-        self.member = member
-        self.id = id
-        self.guild_id = guild_id
-        self.channel_id = channel_id
-        self.data = data
-    def send(messsage = None, autocomplete = None, modal = None): ...
+    def __init__(self, payload):
+        _payload = json.loads(payload) if type(payload) is str else payload
+        self.version = _payload['version']
+        self._type = _payload['type']
+        self.member = Member(_payload['member'])
+        self.id = _payload['id']
+        self.token = _payload['token']
+        self.guild_id = _payload['guild_id']
+        self.channel_id = _payload['channel_id']
+        self.data = _payload['data']
+
 
 class ChannelMention:
     def __init__(self, id, guild_id, type, name):
@@ -164,7 +161,7 @@ class ChannelMention:
 
 class ActionRow(MessageComponent):
     type: int = MESSAGE_COMPONENT_TYPES.ACTION_ROW
-    components: list(MessageComponent)
+    components: list()
 
 class PartialEmoji:
     def __init__(self, name, id, animated):
@@ -216,7 +213,7 @@ class SelectOption:
 class SelectMenu(MessageComponent):
     type: int = MESSAGE_COMPONENT_TYPES.SELECT_MENU
     custom_id: str
-    options: list(SelectOption)
+    options: list()
     placeholder: str
     min_values: int
     max_values: int

@@ -1,10 +1,11 @@
 class User:
-    def __init__(self, id=None, username=None, avatar=None, discriminator=None, public_flags=None):
-        self.id = id
-        self.username = username
-        self.avatar = avatar
-        self.discriminator = discriminator
-        self.public_flags = public_flags
+    def __init__(self, user):
+        _user = json.loads(user) if type(user) is str else user
+        self.id = _user['id']
+        self.username = _user['username']
+        self.avatar = _user['avatar']
+        self.discriminator = _user['discriminator']
+        self.public_flags = _user['public_flags']
     def __iter__(self):
         return {
             "id": self.id,
@@ -15,17 +16,18 @@ class User:
         }
 
 class Member:
-    def __init__(self, user=None, roles=None, premium_since=None, permissions=None, pending=False, nick=None, mute=False, joined_at=None, is_pending=False, deaf=False):
-        self.user = user
-        self.roles = roles
-        self.premium_since = premium_since
-        self.permissions = permissions
-        self.pending = pending
-        self.nick = nick
-        self.mute = mute
-        self.joined_at = joined_at
-        self.is_pending = is_pending
-        self.deaf = deaf
+    def __init__(self, member):
+        _member = json.loads(member) if type(member) is str else member
+        self.user = User(member['user'])
+        self.roles = _member['roles']
+        self.premium_since = _member['premium_since']
+        self.permissions = _member['permissions']
+        self.pending = _member['pending']
+        self.nick = _member['nick']
+        self.mute = _member['mute']
+        self.joined_at = _member['joined_at']
+        self.is_pending = _member['is_pending']
+        self.deaf = _member['deaf']
     def __iter__(self) -> dict:
         return {
             "user": self.user,

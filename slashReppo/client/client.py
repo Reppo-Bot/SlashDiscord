@@ -1,6 +1,7 @@
 """ This module is resposnible for holding the client for the library"""
 from typing import OrderedDict, Any
 from ..command.command import Command
+from ..util.interaction import Interaction
 import json
 import asyncio
 import websockets
@@ -10,6 +11,7 @@ import platform
 import logging
 import signal
 import sys
+import requests
 
 BASE_URL = 'https://discord.com/api/v9'
 API_VERSION = "/?v=9&encoding=json"
@@ -70,7 +72,7 @@ class Client:
         sys.exit(0)
 
     def register(self):
-        for command in self.commmands:
+        for command in self.commands:
             try:
                 if (command.json() == None):
                     raise f"Invalid command {command.str()}"
@@ -81,20 +83,30 @@ class Client:
         registered = []
         try:
             for command in self.commands:
-                for id in command.guild_ids:
-                    url = f"https://discord.com/api/v9/applications/{self.app_id}/guilds/{id}/commands"
+                if(command.guild_ids == None):
+                    url = f"https://discord.com/api/v9/applications/{self._app_id}/commands"
                     self.logger.debug(f"Registering: {url}")
                     r = requests.post(url, headers=header, json=command.json())
-                    registered.append(f"{url}/{r.command_id}")
+                    self.logger.debug(r.json())
+                    self.logger.debug(r.status_code)
+                    registered.append(f"{url}/{r.json()['id']}")
+                    continue
+                for id in command.guild_ids:
+                    url = f"https://discord.com/api/v9/applications/{self._app_id}/guilds/{id}/commands"
+                    self.logger.debug(f"Registering: {url}")
+                    r = requests.post(url, headers=header, json=command.json())
+                    self.logger.debug(r.json())
+                    self.logger.debug(r.status_code)
+                    registered.append(f"{url}/{r.json()['id']}")
             print("Successfully registered all commands")
             self.logger.info("Registered all commands")
-        except Exception(e):
+        except Exception as e:
             print("Failed to regeister some commands, attempting to deregister posted ones...")
             self.logger.error(e)
             self.logger.error("Command registration failed")
             for url in registered:
-                r = requests.delete(url)
-                if(r.status != 200):
+                r = requests.delete(url, headers=header)
+                if(r.status_code != 201):
                     print(f"Faield to deregister {url}")
                     self.logger.error(f"Failed to deregister {url}")
             print("Successfully deregistered partial command set")
@@ -206,6 +218,17 @@ class Client:
                 self.logger.warning(f"Heartbeat requested!")
                 await self.websocket.send(str(self.heartbeat))
                 continue
+            if(_payload.op == GATEWAY_OPCODES.DISPATCH.value and _payload.t == "INTERACTION_CREATE"):
+                res = self.command_cache[_payload.d['data']['name']]()
+                interaction = Interaction(_payload.d)
+                url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
+                json = {
+                    "type": 4,
+                    "data": {
+                        "content": res
+                    }
+                }
+                r = requests.post(url, json=json)
 
     async def _heartbeatLoop(self):
         heartbeatTime = self.heartbeat_interval * .0001
