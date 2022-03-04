@@ -7,7 +7,7 @@ option = dict
 choice = dict
 
 """Enum for command types"""
-class COMMAND_TYPE(IntEnum): ... 
+class COMMAND_TYPE(IntEnum): ...
 
 def create_option(name: str, desc: str, option_type: int, required: bool, choices: list(str) = None) -> option: ...
 
@@ -17,7 +17,7 @@ class Command:
     description: str
     options: list(option) = None
     guild_ids: list(int) = None
-    default_perms: bool = True
+    default_permission: bool = True
     permissions: dict = None
     handler: Callable[...,Any] = None
     def __init__(self, name: str, type: int, description: str, options: list(option) = None) -> None: ...

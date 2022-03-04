@@ -72,7 +72,7 @@ class Client:
         sys.exit(0)
 
     def register(self):
-        for command in self.commmands:
+        for command in self.commands:
             try:
                 if (command.json() == None):
                     raise f"Invalid command {command.str()}"
@@ -83,20 +83,26 @@ class Client:
         registered = []
         try:
             for command in self.commands:
-                for id in command.guild_ids:
-                    url = f"https://discord.com/api/v9/applications/{self.app_id}/guilds/{id}/commands"
+                if(command.guild_ids == None):
+                    url = f"https://discord.com/api/v9/applications/{self._app_id}/commands"
                     self.logger.debug(f"Registering: {url}")
                     r = requests.post(url, headers=header, json=command.json())
-                    registered.append(f"{url}/{r.command_id}")
+                    registered.append(f"{url}/{r.json()['id']}")
+                    continue
+                for id in command.guild_ids:
+                    url = f"https://discord.com/api/v9/applications/{self._app_id}/guilds/{id}/commands"
+                    self.logger.debug(f"Registering: {url}")
+                    r = requests.post(url, headers=header, json=command.json())
+                    registered.append(f"{url}/{r.json()['id']}")
             print("Successfully registered all commands")
             self.logger.info("Registered all commands")
-        except Exception(e):
+        except Exception as e:
             print("Failed to regeister some commands, attempting to deregister posted ones...")
             self.logger.error(e)
             self.logger.error("Command registration failed")
             for url in registered:
-                r = requests.delete(url)
-                if(r.status != 200):
+                r = requests.delete(url, headers=header)
+                if(r.status_code != 201):
                     print(f"Faield to deregister {url}")
                     self.logger.error(f"Failed to deregister {url}")
             print("Successfully deregistered partial command set")
