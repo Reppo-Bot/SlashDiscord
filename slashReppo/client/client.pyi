@@ -5,7 +5,9 @@ import asyncio
 from slashReppo.command.command import Command
 
 class Client:
-
+    """A client that can connect to discord.
+    This class can start the connection with the API and websocket
+    """
     commands: list
     command_cache: OrderedDict[str, Any]
     event_cache: OrderedDict[str, Any]
@@ -23,8 +25,7 @@ class Client:
     _die: bool
     log_level: int
     def __init__(self, token, intents, app_id, commands=[], log_level=0, log_file="slashReppo.log") -> None: ...
-    """A client that can connect to discord.
-    This class can start the connection with the API and websocket
+    """Initialization of client class 
 
     :param token: discord bot token
     :type token: str
