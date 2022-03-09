@@ -64,6 +64,13 @@ class Client:
     :rtype: bool
     :return: if registration was successful
     """
+    def deregister(self, guild_ids = []) -> bool: ...
+    """Deregister all commands for each guild in list
+    This commonly gets rate limited, so it might take a few seconds.
+
+    :rtype: bool
+    :return: if deregistration was successful
+    """
     async def _startup(self, websocketUrl) -> bool: ...
     async def _loop(self) -> None: ...
     async def _heartbeatLoop(self) -> None: ...
