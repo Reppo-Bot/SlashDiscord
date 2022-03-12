@@ -22,7 +22,7 @@ class Client:
         self._token         = token
         self.intents        = intents
         self._app_id        = app_id
-        self.commands       = commands if type(commands) == list else [commands]
+        self.commands       = []
         self.command_cache  = OrderedDict()
         self.event_cache    = OrderedDict()
         self.heartbeat      = Payload({"op": 1,"d": None})
@@ -30,6 +30,8 @@ class Client:
         self._die           = False
         self._can_resume    = False
         self.websocket      = None
+        if(commands != []):
+            self.push(commands)
         logging.basicConfig(filename=log_file, encoding='utf-8', level=log_level)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
