@@ -12,6 +12,7 @@ import logging
 import signal
 import sys
 import requests
+import time
 
 BASE_URL = 'https://discord.com/api/v9'
 API_VERSION = "/?v=9&encoding=json"
@@ -84,20 +85,26 @@ class Client:
         try:
             for command in self.commands:
                 if(command.guild_ids == None):
-                    url = f"https://discord.com/api/v9/applications/{self._app_id}/commands"
+                    url = f"{BASE_URL}/applications/{self._app_id}/commands"
                     self.logger.debug(f"Registering: {url}")
                     r = requests.post(url, headers=header, json=command.json())
                     self.logger.debug(r.json())
                     self.logger.debug(r.status_code)
                     registered.append(f"{url}/{r.json()['id']}")
+                    if(r.headers['X-RateLimit-Remaining'] == '0'):
+                        self.logger.warning(f"Getting limited:\n\tBucket: {r.headers['X-RateLimit-Bucket']}\n\tLimit: {r.headers['X-RateLimit-Limit']}")
+                        time.sleep(float(r.headers['X-RateLimit-Reset-After']))
                     continue
                 for id in command.guild_ids:
-                    url = f"https://discord.com/api/v9/applications/{self._app_id}/guilds/{id}/commands"
+                    url = f"{BASE_URL}/applications/{self._app_id}/guilds/{id}/commands"
                     self.logger.debug(f"Registering: {url}")
                     r = requests.post(url, headers=header, json=command.json())
                     self.logger.debug(r.json())
                     self.logger.debug(r.status_code)
                     registered.append(f"{url}/{r.json()['id']}")
+                    if(r.headers['X-RateLimit-Remaining'] == '0'):
+                        self.logger.warning(f"Getting limited:\n\tBucket: {r.headers['X-RateLimit-Bucket']}\n\tLimit: {r.headers['X-RateLimit-Limit']}")
+                        time.sleep(float(r.headers['X-RateLimit-Reset-After']))
             print("Successfully registered all commands")
             self.logger.info("Registered all commands")
         except Exception as e:
@@ -106,11 +113,48 @@ class Client:
             self.logger.error("Command registration failed")
             for url in registered:
                 r = requests.delete(url, headers=header)
-                if(r.status_code != 201):
+                if(r.status_code != 204):
                     print(f"Faield to deregister {url}")
                     self.logger.error(f"Failed to deregister {url}")
+                if(r.headers['X-RateLimit-Remaining'] == '0'):
+                    self.logger.warning(f"Getting limited:\n\tBucket: {r.headers['X-RateLimit-Bucket']}\n\tLimit: {r.headers['X-RateLimit-Limit']}")
+                    time.sleep(float(r.headers['X-RateLimit-Reset-After']))
             print("Successfully deregistered partial command set")
             self.logger.info("Deregistered partial command set")
+
+    def deregister(self, guild_ids = []):
+        header = {"Authorization": f"Bot {self._token}"}
+        if(guild_ids == []):
+            url = f"{BASE_URL}/applications/{self._app_id}/commands"
+            response = requests.get(url, headers=header)
+            payload = response.json()
+            self.logger.debug(f"Global commands to delete: {payload}")
+            for command in payload:
+                r = requests.delete(f"{url}/{command['id']}", headers=header)
+                if(r.status_code != 204):
+                    print(f"Faield to deregister {url}")
+                    self.logger.error(f"Failed to deregister {url}")
+                    return False
+                if(r.headers['X-RateLimit-Remaining'] == '0'):
+                    self.logger.warning(f"Getting limited:\n\tBucket: {r.headers['X-RateLimit-Bucket']}\n\tLimit: {r.headers['X-RateLimit-Limit']}")
+                    time.sleep(float(r.headers['X-RateLimit-Reset-After']))
+            return True
+
+        for id in guild_ids:
+            url = f"{BASE_URL}/applications/{self._app_id}/guilds/{id}/commands"
+            response = requests.get(url, headers=header)
+            payload = response.json()
+            self.logger.debug(f"Commands to delete: {payload}")
+            for command in payload:
+                r = requests.delete(f"{url}/{command['id']}", headers=header)
+                if(r.status_code != 204):
+                    print(f"Failed to deregister {url}/{command['id']}")
+                    self.logger.error(f"Failed to deregister {url}/{command['id']}")
+                    return False
+                if(r.headers['X-RateLimit-Remaining'] == '0'):
+                    self.logger.warning(f"Getting limited:\n\tBucket: {r.headers['X-RateLimit-Bucket']}\n\tLimit: {r.headers['X-RateLimit-Limit']}")
+                    time.sleep(float(r.headers['X-RateLimit-Reset-After']))
+            return True
 
     async def _startup(self, websocketUrl):
         while True:
