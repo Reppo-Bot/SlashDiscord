@@ -6,6 +6,7 @@ src/SlashDiscord/__init__.py
 src/SlashDiscord.egg-info/PKG-INFO
 src/SlashDiscord.egg-info/SOURCES.txt
 src/SlashDiscord.egg-info/dependency_links.txt
+src/SlashDiscord.egg-info/requires.txt
 src/SlashDiscord.egg-info/top_level.txt
 src/SlashDiscord/client/__init__.py
 src/SlashDiscord/client/client.py
