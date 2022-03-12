@@ -262,8 +262,8 @@ class Client:
                 await self.websocket.send(str(self.heartbeat))
                 continue
             if(_payload.op == GATEWAY_OPCODES.DISPATCH.value and _payload.t == "INTERACTION_CREATE"):
-                res = self.command_cache[_payload.d['data']['name']]()
                 interaction = Interaction(_payload.d)
+                res = self.command_cache[_payload.d['data']['name']](interaction)
                 url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
                 json = {
                     "type": 4,

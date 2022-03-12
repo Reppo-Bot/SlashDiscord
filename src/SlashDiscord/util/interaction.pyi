@@ -86,8 +86,7 @@ class Interaction:
     guild_id: str = None
     channel_id: str = None
     data: dict = None
-    def __init__(self, type: int, member: Member, id: str, guild_id: str = None, channel_id: str = None, data: dict = None) -> None: ...
-    def send(messsage: Message = None, autocomplete: Autocomplete = None, modal: Modal = None) -> None: ...
+    def __init__(self, payload) -> None: ...
 
 class ChannelMention:
     id: str = None
