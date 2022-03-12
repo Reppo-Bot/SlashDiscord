@@ -28,6 +28,7 @@ class Member:
         self.joined_at = _member['joined_at']
         self.is_pending = _member['is_pending']
         self.deaf = _member['deaf']
+        self.avatar = _member["avatar"]
     def __iter__(self) -> dict:
         return {
             "user": self.user,
@@ -39,5 +40,6 @@ class Member:
             "mute": self.mute,
             "joined_at": self.joined_at,
             "is_pending": self.is_pending,
-            "deaf": self.deaf
+            "deaf": self.deaf,
+            "avatar": self.avatar
         }
