@@ -20,6 +20,7 @@ class Command:
     default_permission: bool = True
     permissions: dict = None
     handler: Callable[...,Any] = None
+    respond: bool = True
     def __init__(self, name: str, type: int, description: str, options: list(option) = None) -> None: ...
     def json(self) -> dict: ...
 

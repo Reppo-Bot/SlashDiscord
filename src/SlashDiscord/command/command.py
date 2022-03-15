@@ -15,7 +15,7 @@ class COMMAND_TYPE(Enum):
 def create_option(name, desc, option_type, required, choices=None): ... # todo
 
 class Command:
-    def __init__(self, name, type, description, options=None, guild_ids=None, default_perms=True, permissions=None, handler=None):
+    def __init__(self, name, type, description, options=None, guild_ids=None, default_perms=True, permissions=None, handler=None, respond=True):
         self.name = name
         self.type = type
         self.description = description
@@ -24,7 +24,7 @@ class Command:
         self.default_permission = default_perms
         self.permissions = permissions
         self.handler = handler
-
+        self.respond = respond
     def __repr__(self):
         return str(self.json())
 

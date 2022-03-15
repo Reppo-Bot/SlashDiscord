@@ -22,8 +22,7 @@ class Client:
         self._token         = token
         self.intents        = intents
         self._app_id        = app_id
-        self.commands       = []
-        self.command_cache  = OrderedDict()
+        self.commands       = OrderedDict()
         self.event_cache    = OrderedDict()
         self.heartbeat      = Payload({"op": 1,"d": None})
         self._reconnect     = False
@@ -43,11 +42,9 @@ class Client:
 
         if(type(c) is list):
             for command in c:
-                self.commands.append(command)
-                self.command_cache[command.name] = command.handler
+                self.commands[command.name] = command
         else:
-            self.command_cache[c.name] = c.handler
-            self.commands.append(c)
+            self.commands[c.name] = c
 
     def on(self, event, callback):
         self.event_cache[event] = callback
@@ -74,7 +71,7 @@ class Client:
         sys.exit(0)
 
     def register(self):
-        for command in self.commands:
+        for command in self.commands.values():
             try:
                 if (command.json() == None):
                     raise f"Invalid command {command.str()}"
@@ -84,7 +81,7 @@ class Client:
         header = {"Authorization": f"Bot {self._token}"}
         registered = []
         try:
-            for command in self.commands:
+            for command in self.commands.values():
                 if(command.guild_ids == None):
                     url = f"{BASE_URL}/applications/{self._app_id}/commands"
                     self.logger.debug(f"Registering: {url}")
@@ -265,15 +262,17 @@ class Client:
                 continue
             if(_payload.op == GATEWAY_OPCODES.DISPATCH.value and _payload.t == "INTERACTION_CREATE"):
                 interaction = Interaction(_payload.d)
-                res = self.command_cache[_payload.d['data']['name']](interaction)
-                url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
-                json = {
-                    "type": 4,
-                    "data": {
-                        "content": res
+                command = self.commands[_payload.d['data']['name']]
+                res = command.handler(interaction)
+                if(command.respond):
+                    url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
+                    json = {
+                        "type": 4,
+                        "data": {
+                            "content": res
+                        }
                     }
-                }
-                r = requests.post(url, json=json)
+                    r = requests.post(url, json=json)
 
     async def _heartbeatLoop(self):
         heartbeatTime = self.heartbeat_interval * .0001
