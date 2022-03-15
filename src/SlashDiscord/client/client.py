@@ -22,7 +22,7 @@ class Client:
         self._token         = token
         self.intents        = intents
         self._app_id        = app_id
-        self.commands       = commands
+        self.commands       = commands if type(commands) == list else [commands]
         self.command_cache  = OrderedDict()
         self.event_cache    = OrderedDict()
         self.heartbeat      = Payload({"op": 1,"d": None})
@@ -34,7 +34,6 @@ class Client:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
         signal.signal(signal.SIGINT, self.disconnect)
-    def __call__(self, *args, **kwds): ... # todo
 
     def push(self, c):
         if not c:
@@ -79,7 +78,7 @@ class Client:
                     raise f"Invalid command {command.str()}"
             except Exception as e:
                 self.logger.error(e)
-                return False
+                return
         header = {"Authorization": f"Bot {self._token}"}
         registered = []
         try:
@@ -164,7 +163,7 @@ class Client:
             if(helloResponse.op != GATEWAY_OPCODES.HELLO.value):
                 print("Error: Unexpected init opcode")
                 self.logger.error("Unexpected init opcode")
-                return False
+                return
             self.heartbeat_interval = helloResponse.d["heartbeat_interval"]
             self.logger.debug(f"HEARTBEAT: {self.heartbeat_interval}")
             if(self._can_resume):

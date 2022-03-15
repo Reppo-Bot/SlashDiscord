@@ -1,10 +1,10 @@
 #!/bin/zsh
 cd /home/josh/reppo/slash-reppo
-rm -rf build dist slashReppo.egg-info slashReppo/__pycache__
+rm -rf build dist
 echo "Removed cached files\n"
-echo y | pip uninstall slashReppo
+echo y | pip uninstall SlashDiscord
 echo "Removed old lib\n"
-python setup.py bdist_wheel
+python -m build
 echo "Built lib\n"
-pip install dist/slashReppo-0.0.1-py3-none-any.whl
+pip install dist/SlashDiscord-0.1.0-py3-none-any.whl
 echo "Installed new lib\n"

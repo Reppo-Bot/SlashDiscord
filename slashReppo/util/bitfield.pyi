@@ -1,4 +1,0 @@
-"""Bitfield Class"""
-
-class Bitfield:
-    ...
