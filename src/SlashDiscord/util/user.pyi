@@ -20,5 +20,6 @@ class Member:
     joined_at: str=None
     is_pending: bool=False
     deaf: bool=False
+    avatar
     def __init__(self, user: User=None, roles: list(str)=None, premium_since: str=None, permissions: str=None, pending: bool=False, nick: str=None, mute: bool=False, joined_at: str=None, is_pending: bool=False, deaf: bool=False) -> None: ...
     def __iter__(self) -> dict: ...
