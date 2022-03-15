@@ -263,8 +263,8 @@ class Client:
             if(_payload.op == GATEWAY_OPCODES.DISPATCH.value and _payload.t == "INTERACTION_CREATE"):
                 interaction = Interaction(_payload.d)
                 command = self.commands[_payload.d['data']['name']]
-                res = command.handler(interaction)
                 if(command.respond):
+                    res = command.handler(interaction)
                     url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
                     json = {
                         "type": 4,
@@ -273,6 +273,8 @@ class Client:
                         }
                     }
                     r = requests.post(url, json=json)
+                else:
+                    res = command.handler(_payload.d)
 
     async def _heartbeatLoop(self):
         heartbeatTime = self.heartbeat_interval * .0001
