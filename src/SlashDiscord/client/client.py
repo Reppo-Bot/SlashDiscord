@@ -265,16 +265,19 @@ class Client:
                 command = self.commands[_payload.d['data']['name']]
                 if(command.respond):
                     res = command.handler(interaction)
-                    url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
-                    json = {
-                        "type": 4,
-                        "data": {
-                            "content": res
-                        }
-                    }
-                    r = requests.post(url, json=json)
                 else:
                     res = command.handler(_payload.d)
+                    if(not res['error']):
+                        continue
+                    res = res['message']
+                url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
+                json = {
+                    "type": 4,
+                    "data": {
+                        "content": res
+                    }
+                }
+                r = requests.post(url, json=json)
 
     async def _heartbeatLoop(self):
         heartbeatTime = self.heartbeat_interval * .0001
