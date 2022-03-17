@@ -8,8 +8,7 @@ class Client:
     """A client that can connect to discord.
     This class can start the connection with the API and websocket.
     """
-    commands: list
-    command_cache: OrderedDict[str, Any]
+    commands: OrderedDict[str, Any]
     event_cache: OrderedDict[str, Any]
     client_events: OrderedDict[str, Any]
     _token: str
