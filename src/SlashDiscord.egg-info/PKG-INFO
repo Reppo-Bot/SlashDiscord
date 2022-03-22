@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: SlashDiscord
-Version: 0.1.1
+Version: 0.2.0
 Summary: Extra lightweight discord slash command library
 Home-page: https://github.com/Reppo-Bot/SlashDiscord
 Author: Joshua Brown & Matt Dray
@@ -26,7 +26,7 @@ library that keeps it simple, stupid.
 
 ## Usage
 First, define any of your functions
-> def ping():
+> def ping(ctx):
 >     return "Hey pong!"
 
 Then, initialize the function as a slash command object
