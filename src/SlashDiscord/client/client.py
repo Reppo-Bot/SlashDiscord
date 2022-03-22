@@ -23,12 +23,12 @@ class Client:
         self.intents        = intents
         self._app_id        = app_id
         self.commands       = OrderedDict()
-        self.event_cache    = OrderedDict()
         self.heartbeat      = Payload({"op": 1,"d": None})
         self._reconnect     = False
         self._die           = False
         self._can_resume    = False
         self.websocket      = None
+        self.default_response = Command("default", 1, "default command", handler=(lambda ctx: "Command not configured!"), respond=False)
         if(commands != []):
             self.push(commands)
         logging.basicConfig(filename=log_file, encoding='utf-8', level=log_level)
@@ -46,8 +46,12 @@ class Client:
         else:
             self.commands[c.name] = c
 
-    def on(self, event, callback):
-        self.event_cache[event] = callback
+    def setDefault(self, func):
+        if(type(func) == Command):
+            self.default_response = func
+        else:
+            print("Paramater must be a slashCommand Type!")
+            self.logger.error(f"Paramater must be a slashCommand Type, instead got: {type(func)}")
 
     def connect(self):
         payload = requests.get(BASE_URL + "/gateway/bot", headers={"Authorization": "Bot " + self._token})
@@ -262,14 +266,16 @@ class Client:
                 continue
             if(_payload.op == GATEWAY_OPCODES.DISPATCH.value and _payload.t == "INTERACTION_CREATE"):
                 interaction = Interaction(_payload.d)
-                command = self.commands[_payload.d['data']['name']]
+                if(interaction.data['name'] not in self.commands):
+                    command = self.default_response
+                else:
+                    command = self.commands[interaction.data['name']]
                 if(command.respond):
                     res = command.handler(interaction)
                 else:
                     res = command.handler(_payload.d)
-                    if(not res['error']):
+                    if(type(res) != str):
                         continue
-                    res = res['message']
                 url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
                 json = {
                     "type": 4,
