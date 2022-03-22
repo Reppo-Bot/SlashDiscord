@@ -9,7 +9,7 @@ library that keeps it simple, stupid.
 
 ## Usage
 First, define any of your functions
-> def ping():
+> def ping(ctx):
 >     return "Hey pong!"
 
 Then, initialize the function as a slash command object
