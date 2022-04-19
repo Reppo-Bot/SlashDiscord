@@ -71,7 +71,7 @@ class Client:
         except Exception as e:
             print("Failed to close websocket, probably not running.")
             print(e)
-            self.logging.error(f"Failed to gracefully exit: {e}")
+            self.logger.error(f"Failed to gracefully exit: {e}")
         sys.exit(0)
 
     def register(self):
@@ -214,7 +214,7 @@ class Client:
             for task in pending:
                 task.cancel()
             if(self._can_resume):
-                self.logger.waring("Attempting to resume")
+                self.logger.warning("Attempting to resume")
                 await self.websocket.close(code=4099, reason="Attempting Resume")
                 continue
 
