@@ -6,5 +6,5 @@ echo y | pip uninstall SlashDiscord
 echo "Removed old lib\n"
 python -m build
 echo "Built lib\n"
-pip install dist/SlashDiscord-0.2.1-py3-none-any.whl
+pip install dist/SlashDiscord-*.whl
 echo "Installed new lib\n"
