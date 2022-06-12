@@ -49,6 +49,35 @@ class Client:
     :param c: list, or single command for the bot to map registerd commands to.
     :type c: list(slashReppo.command) | slashReppo.command
     """
+    def pushHandler(self, handler, handlerType) -> None: ...
+    """Push handlers to the clients list of handlers
+
+    :param handler: function called every time payload on websocket is of type handlerType
+    :type handler: function
+    :param handlerType: name of discord event sent over the websocket
+    :type handlerType: string
+    """
+    def deleteMessage(self, channelId, messageId) -> None: ...
+    """Delete message given a channel and message id
+    :param channelId: id of the channel containing the message
+    :type channelId: string
+    :param messageId: id of the individual message in a given channel
+    :param messageId: string
+    """
+    def getMessage(self, channelId, messageId) -> dict: ...
+    """Get attributes and contents of a message
+    :param channelId: id of the channel containing the message
+    :type channelId: string
+    :param messageId: id of the individual message in a given channel
+    :param messageId: string
+    """
+    def createMessage(self, channelId, content) -> None: ...
+    """Send a message to a given channel with simple contents
+    :param channelId: id of the channel containing the message
+    :type channelId: string
+    :param content: string contents of the message
+    :param content: string
+    """
     def on(self, event, callback) -> None: ...
     def connect(self) -> None: ...
     """Initialize connection to the discord server.

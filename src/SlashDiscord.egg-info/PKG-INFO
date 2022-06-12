@@ -40,5 +40,3 @@ If you have not registered thse commands
 
 And finally connect
 > _client.connect()
-
-

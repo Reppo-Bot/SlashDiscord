@@ -23,6 +23,7 @@ class Client:
         self.intents        = intents
         self._app_id        = app_id
         self.commands       = OrderedDict()
+        self.handlers       = OrderedDict()
         self.heartbeat      = Payload({"op": 1,"d": None})
         self._reconnect     = False
         self._die           = False
@@ -46,6 +47,51 @@ class Client:
         else:
             self.commands[c.name] = c
 
+    def deleteMessage(self, channelId, messageId):
+        try:
+            header = {"Authorization": f"Bot {self._token}"}
+            url = f"{BASE_URL}/channels/{channelId}/messages/{messageId}"
+            res = requests.delete(url, headers=header)
+            if(res.status_code != 204):
+                raise Exception(f"Failed to delete message with code {res.status_code}")
+        except Exception as e:
+            print("Failed to delete message")
+            self.logger.error(e)
+
+    def getMessage(self, channelId, messageId):
+        try:
+            header = {"Authorization": f"Bot {self._token}"}
+            url = f"{BASE_URL}/channels/{channelId}/messages/{messageId}"
+            res = requests.get(url, headers=header)
+            return res.json()
+        except Exception as e:
+            print("Failed to get message")
+            self.logger.error(e)
+
+    def createMessage(self, channelId, content):
+        try:
+            header = {"Authorization": f"Bot {self._token}"}
+            url = f"{BASE_URL}/channels/{channelId}/messages"
+            res = requests.post(url, headers=header, json={
+                "content": content
+                })
+        except Exception as e:
+            print("Failed to get message")
+            self.logger.error(e)
+
+
+    def pushHandler(self, handler, handlerType):
+        if not handler:
+            raise Exception("Invalid command")
+
+        if type(handlerType) != str:
+            raise Exception("Invalid Handler Type")
+
+        if(handlerType in self.handlers):
+            raise Exception("Handler Already Exists")
+
+        self.handlers[handlerType] = handler
+
     def setDefault(self, func):
         if(type(func) == Command):
             self.default_response = func
@@ -60,7 +106,6 @@ class Client:
         print(f"Session start limit: {res['session_start_limit']['remaining']}")
         websocketUrl = res["url"] + API_VERSION
         asyncio.run(self._startup(websocketUrl))
-
 
     def disconnect(self, *args):
         print("\nStopping...")
@@ -264,32 +309,36 @@ class Client:
                 self.logger.warning(f"Heartbeat requested!")
                 await self.websocket.send(str(self.heartbeat))
                 continue
-            if(_payload.op == GATEWAY_OPCODES.DISPATCH.value and _payload.t == "INTERACTION_CREATE"):
-                interaction = Interaction(_payload.d)
-                if(interaction.data['name'] not in self.commands):
-                    command = self.default_response
-                else:
-                    command = self.commands[interaction.data['name']]
-                if(command.respond):
-                    res = command.handler(interaction)
-                else:
-                    res = command.handler(_payload.d)
-                    if(type(res) != str):
-                        continue
-                url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
-                json = {
-                    "type": 4,
-                    "data": {
-                        "content": res
+            if(_payload.op == GATEWAY_OPCODES.DISPATCH.value):
+                if(_payload.t == "INTERACTION_CREATE"):
+                    interaction = Interaction(_payload.d)
+                    if(interaction.data['name'] not in self.commands):
+                        command = self.default_response
+                    else:
+                        command = self.commands[interaction.data['name']]
+                    if(command.respond):
+                        res = command.handler(interaction)
+                    else:
+                        res = command.handler(_payload.d)
+                        if(type(res) != str):
+                            continue
+                    url = BASE_URL + f"/interactions/{interaction.id}/{interaction.token}/callback"
+                    json = {
+                        "type": 4,
+                        "data": {
+                            "content": res
+                        }
                     }
-                }
-                r = requests.post(url, json=json)
+                    r = requests.post(url, json=json)
+
+                if(_payload.t in self.handlers):
+                    self.logger.info(_payload)
+                    self.handlers[_payload.t](self, _payload.d)
 
     async def _heartbeatLoop(self):
         heartbeatTime = self.heartbeat_interval * .0001
         await self.websocket.send(str(self.heartbeat))
         self._heartbeat_heard = False
-        self.logger.debug(f"Beating at {heartbeatTime}")
         await asyncio.sleep(heartbeatTime * .7)
         while self._heartbeat_heard:
             await self.websocket.send(str(self.heartbeat))
