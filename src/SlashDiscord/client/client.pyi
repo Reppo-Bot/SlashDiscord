@@ -71,12 +71,12 @@ class Client:
     :param messageId: id of the individual message in a given channel
     :param messageId: string
     """
-    def createMessage(self, channelId, content) -> None: ...
-    """Send a message to a given channel with simple contents
+    def createMessage(self, channelId, body) -> None: ...
+    """Send a message to a given channel with the given body as a payload to discord
     :param channelId: id of the channel containing the message
     :type channelId: string
-    :param content: string contents of the message
-    :param content: string
+    :param body: Body of the request to post message to discord
+    :param body: dict
     """
     def on(self, event, callback) -> None: ...
     def connect(self) -> None: ...

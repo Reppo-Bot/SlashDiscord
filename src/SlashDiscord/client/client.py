@@ -68,13 +68,11 @@ class Client:
             print("Failed to get message")
             self.logger.error(e)
 
-    def createMessage(self, channelId, content):
+    def createMessage(self, channelId, body):
         try:
             header = {"Authorization": f"Bot {self._token}"}
             url = f"{BASE_URL}/channels/{channelId}/messages"
-            res = requests.post(url, headers=header, json={
-                "content": content
-                })
+            res = requests.post(url, headers=header, json=body)
         except Exception as e:
             print("Failed to get message")
             self.logger.error(e)
