@@ -68,14 +68,26 @@ class Client:
             print("Failed to get message")
             self.logger.error(e)
 
-    def createMessage(self, channelId, body):
+    def createMessage(self, channelId, body, files={}):
         try:
             header = {"Authorization": f"Bot {self._token}"}
             url = f"{BASE_URL}/channels/{channelId}/messages"
-            res = requests.post(url, headers=header, json=body)
+            res = requests.post(url, headers=header, json=body, files=files)
+            return res.json()
         except Exception as e:
-            print("Failed to get message")
+            print("Failed to send message")
             self.logger.error(e)
+
+    def addReaction(self, channelId, messageId, emoji):
+        try:
+            header = {"Authorization": f"Bot {self._token}"}
+            url = f"{BASE_URL}/channels/{channelId}/messages/{messageId}/reactions/{emoji}/@me"
+            res = requests.put(url, headers=header)
+            return res.json()
+        except Exception as e:
+            print("Failed to add reaction")
+            self.logger.error(e)
+
 
 
     def pushHandler(self, handler, handlerType):
@@ -271,12 +283,16 @@ class Client:
     async def _loop(self):
         async for message in self.websocket:
             _payload = Payload(message)
-            print(_payload)
             if(_payload.s != None):
                 self._last_sequence = _payload.s
+            if(_payload.op == GATEWAY_OPCODES.HEARTBEAT.value):
+                self.logger.warning(f"Heartbeat requested!")
+                await self.websocket.send(str(self.heartbeat))
+                continue
             if(_payload.op == GATEWAY_OPCODES.HEARTBEAT_ACK.value):
                 self._heartbeat_heard = True
                 continue
+            print(_payload)
             if(_payload.op in [GATEWAY_OPCODES.INVALID_SESSION.value,
                                 GATEWAY_CLOSE_CODES.UNKNOWN_ERROR.value,
                                 GATEWAY_CLOSE_CODES.UNKNOWN_OPCODE.value,
@@ -303,10 +319,6 @@ class Client:
                 self.logger.error(f"Bad opcode: {GATEWAY_CLOSE_CODES(_payload.op)}")
                 self.logger.error("Shutdown")
                 return
-            if(_payload.op == GATEWAY_OPCODES.HEARTBEAT.value):
-                self.logger.warning(f"Heartbeat requested!")
-                await self.websocket.send(str(self.heartbeat))
-                continue
             if(_payload.op == GATEWAY_OPCODES.DISPATCH.value):
                 if(_payload.t == "INTERACTION_CREATE"):
                     interaction = Interaction(_payload.d)
